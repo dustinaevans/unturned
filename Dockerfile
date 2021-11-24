@@ -5,13 +5,6 @@ LABEL maintainer="jesperbagge@gmail.com"
 ENV UNTURNED_REPO /gameserver
 ENV STEAM_USER anonymous
 ENV STEAM_PWD ""
-ENV INSTANCE_NAME Dockerserver
-
-# Create base folders
-RUN mkdir -p $UNTURNED_REPO/Servers/$INSTANCE_NAME $UNTURNED_REPO/Scripts
-
-# Copy scripts into the steamcmd repo
-ADD scripts/* $UNTURNED_REPO/Scripts
 
 # Install necessary tools to run SteamCMD and Unturned
 RUN dpkg --add-architecture i386
@@ -23,6 +16,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     wget
+RUN apt-get install steamcmd
+
+RUN steamcmd +login anonymous +app_update 1110390 +quit
 
 # Open ports to the container
 EXPOSE 27016/udp
@@ -31,8 +27,5 @@ EXPOSE 27017/udp
 # Mount serverfolder for persistence
 VOLUME $UNTURNED_REPO/Servers/$INSTANCE_NAME
 
-# Set workdir
-WORKDIR $UNTURNED_REPO/Scripts
-
 # Download SteamCMD and Unturned
-CMD ./build-server.sh
+CMD "sh /root/.steam/steamapps/common/U3DS/ExampleServer.sh"
